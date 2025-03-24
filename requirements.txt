@@ -1,6 +1,7 @@
 streamlit
 pandas
-matplotlib import pyplot
+matplotlib 
+from matplotlib import pyplot
 matplotlib.ticker
 numpy
 openpyxl
