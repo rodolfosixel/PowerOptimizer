@@ -298,7 +298,7 @@ def definir_sigla(value):
     elif value == "EFLUL":
         sigla = "Eflul"
     elif value == "Energisa Acre":
-        sigla = "Eletroacre"
+        sigla = "EAC"
     elif value == "Energisa MG":
         sigla = "EMG"
     elif value == "Energisa Mato Grosso do Sul":
@@ -950,7 +950,7 @@ with st.expander(("Como realizar as simulações")):
     ))
 
 
-if st.button("Simular Verde"):
+if st.button("Simular Verde :large_green_square:"):
     st.write("---")
     valor_otimo, demanda_otima_verde = varredura(30, 1000, demanda_contratada_verde)
     custo = custo_atual()
@@ -961,7 +961,7 @@ if st.button("Simular Verde"):
     plotar_verde(demanda_contratada_verde, demanda_otima_verde, vetor_demanda_fp)
 
 
-if st.button("Simular Azul"):
+if st.button("Simular Azul :large_blue_square:"):
     st.write("---")
     valor_otimo, demanda_otima_verde, valor_otimo_azul, demanda_otima_azul = \
         varredura_azul(30, 1000, demanda_contratada_verde, demanda_contratada_azul)
@@ -974,7 +974,7 @@ if st.button("Simular Azul"):
     plotar_azul(demanda_contratada_azul, demanda_otima_azul, vetor_demanda_ponta)
 
 
-if st.button("Simular Completo"):
+if st.button("Simular Completo :heavy_check_mark: "):
     st.write("---")
 
     valor_otimo, demanda_otima_verde, valor_otimo_azul, demanda_otima_azul = \
