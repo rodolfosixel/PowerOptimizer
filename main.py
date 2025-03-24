@@ -186,9 +186,9 @@ def valor_ICMS(estado):
 
 def definir_sigla(value):
     if value == "Amazonas S/A":
-        sigla = "AmE"
+        sigla = "AME"
     elif value == "Cooperativa Castro":
-        sigla = "Castro-DIS"
+        sigla = "CASTRO-DIS"
     elif value == "CEA":
         sigla = "CEA"
     elif value == "Equatorial Alagoas":
@@ -210,11 +210,11 @@ def definir_sigla(value):
     elif value == "Cooperativa Centro Jacuí":
         sigla = "CELETRO"
     elif value == "Equatorial Energia Pará":
-        sigla = "Celpa"
+        sigla = "EQUATORIAL PA"
     elif value == "Neoenergia Pernambuco":
-        sigla = "Celpe"
+        sigla = "Neoenergia PE"
     elif value == "Equatorial Energia Maranhão":
-        sigla = "Cemar"
+        sigla = "Equatorial MA"
     elif value == "CEMIG":
         sigla = "Cemig-D"
     elif value == "CEMIRIM":
@@ -226,7 +226,7 @@ def definir_sigla(value):
     elif value == "Cooperativa Ceraça":
         sigla = "Ceraça"
     elif value == "CERAL Araruama":
-        sigla = "Ceral Araruama"
+        sigla = "CERAL ARARUAMA"
     elif value == "CERAL Arapoti":
         sigla = "Ceral DIS"
     elif value == "CERBRA Norte":
@@ -276,9 +276,9 @@ def definir_sigla(value):
     elif value == "COCEL":
         sigla = "Cocel"
     elif value == "COELBA":
-        sigla = "Coelba"
+        sigla = "COELBA"
     elif value == "COPEL":
-        sigla = "Copel-DIS"
+        sigla = "COPEL-DIS"
     elif value == "Neoenergia COSERN":
         sigla = "Cosern"
     elif value == "CPFL":
@@ -286,7 +286,7 @@ def definir_sigla(value):
     elif value == "Enel SP":
         sigla = "ELETROPAULO"
     elif value == "DEMEI Ijuí":
-        sigla = "Demei"
+        sigla = "DEMEI"
     elif value == "DME Poços de Caldas":
         sigla = "DMED"
     elif value == "Energisa Paraíba":
