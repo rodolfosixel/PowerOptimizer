@@ -332,6 +332,7 @@ def definir_sigla(value):
 
     return sigla
 
+st.set_page_config(page_title="Otimização de Demanda", page_icon=":zap:", layout="wide", initial_sidebar_state="auto", menu_items=None)
 
 with st.sidebar:
     st.write("Programa desenvolvido com objetivo de otimizar a demanda dos clientes do Grupo A")
