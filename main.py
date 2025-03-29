@@ -6,6 +6,14 @@ import numpy as np
 import openpyxl
 
 
+def money_format(valor):
+    valor_string = "{:,}".format(valor)
+
+    valor_string = valor_string.replace('.', '_')
+    valor_string = valor_string.replace(',', '.')
+    valor_string = valor_string.replace('_', ',')
+
+    return valor_string
 
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
@@ -582,6 +590,7 @@ def custo_atual():
         consumo, gasto_consumo_fp_verde, gasto_consumo_ponta_verde = gastos_consumo(tarifa_vec, vetor_consumo_fp,
                                                                                     vetor_consumo_ponta)
         custo_total = valor_fp + consumo
+        custo_demanda = valor_fp
 
     elif modalidade == "Azul":
         tarifa_vec = obter_tarifas(cor='Azul')
@@ -590,8 +599,9 @@ def custo_atual():
         consumo, gasto_consumo_fp_azul, gasto_consumo_ponta_azul = gastos_consumo(tarifa_vec, vetor_consumo_fp,
                                                                                   vetor_consumo_ponta)
         custo_total = round(valor_fp + valor_ponta + consumo, 2)
+        custo_demanda = round(valor_fp + valor_ponta, 2)
 
-    return custo_total
+    return custo_total, custo_demanda
 
 
 gasto_anual = 30
@@ -686,6 +696,8 @@ def gastos_consumo(tarifas, consumo_fp, consumo_ponta):
 
     return total, gasto_consumo_fp, gasto_consumo_ponta
 
+vec_otimo = []
+
 
 def varredura(a, b, demanda_contratada):
     # Função para cálculo da melhor demanda utilizando busca extensiva por varredura
@@ -696,9 +708,13 @@ def varredura(a, b, demanda_contratada):
     demanda_otima = demanda_contratada
     for x in range(a, b):
         teste = objetivo_fp(tarifas, vetor_demanda_fp, x)
+        vec_otimo.append(teste)
+
         if teste < otimo_varredura:
             otimo_varredura = objetivo_fp(tarifas, vetor_demanda_fp, x)
             demanda_otima = x
+
+    # plot_otimo_verde(vec_otimo,demanda_otima)
     return otimo_varredura, demanda_otima
 
 
@@ -726,6 +742,32 @@ def varredura_azul(a, b, demanda_contratada, demanda_contratada_azul):
 
     return otimo_varredura_fp, demanda_otima_fp, otimo_varredura_ponta, demanda_otima_ponta
 
+def plot_otimo_verde(vec_otimo,demanda_otima):
+    x = []
+    for i in range (30,1000):
+        x.append(i)
+
+    x_max = 1.3*demanda_otima
+    minimo = min(vec_otimo)
+    plt.figure(figsize=(20, 10))
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.xlabel("Demanda (kW", fontsize=30)
+    plt.ylabel("Valor (R$)", fontsize=30)
+    plt.title('Simulação: Modalidade Tarifária Verde', fontsize=36)
+    plt.ylim(0, minimo*1.6)
+    plt.plot(x, vec_otimo, color='red', ls='--', label='Custo por demanda', linewidth=4)
+    # plt.plot( , color='red', ls='--', label='Custo por demanda', linewidth=4)
+    plt.xlim(30, x_max)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+    plt.legend(fontsize=30, loc=4)
+    fig = plt.gcf()
+    st.pyplot(fig=fig)
+    fig.savefig('Demanda_Teste.png', format='png')  # salvar o gráfico em png
+    fig.savefig('Demanda_Teste.pdf', format='pdf', bbox_inches='tight')  # salvar o gráfico em pdf
+    print("Grafico Verde gerado com sucesso")
+
 
 def plotar_verde(demanda_contratada, demanda_otima, demanda_fp):
     # Função para plotar o gráfico que simula a situação verde. Demanda contratada, ótima e perfil de consumo
@@ -733,7 +775,7 @@ def plotar_verde(demanda_contratada, demanda_otima, demanda_fp):
     demanda_otima_vec = []
     maximo = 1.2 * max(demanda_fp)  # valor arbitrário para ajustar escala
     for i in range(0, 12):
-        demanda_cont_vec.append(demanda_contratada)
+        demanda_cont_vec.append(float(demanda_contratada))
         demanda_otima_vec.append(demanda_otima)
 
     x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
@@ -765,7 +807,7 @@ def plotar_azul(demanda_contratada_ponta, demanda_otima_ponta, demanda_fp):
     demanda_otima_vec = []
     maximo = 1.2 * max(demanda_fp)  # valor arbitrário para limite do gráfico
     for i in range(0, 12):
-        demanda_cont_vec.append(demanda_contratada_ponta)
+        demanda_cont_vec.append(float(demanda_contratada_ponta))
         demanda_otima_vec.append(demanda_otima_ponta)
 
     x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
@@ -905,18 +947,21 @@ with coluna2:
         tarifas_azul = obter_tarifas("Azul")
 
 
-        st.text_input("Demanda Fora da Ponta (R$/kW)", tarifas_verde[0], key="input_tarifas1")
+        st.text_input("Demanda Fora da Ponta (R$/kW)", round(tarifas_verde[0], 2), key="input_tarifas1")
         # st.text_input("Demanda Ponta Verde (R$/kW):", tarifas_verde[2], key="input_tarifas2")
-        st.text_input("Demanda Ponta Azul (R$/kW):", tarifas_azul[2], key="input_tarifas3")
-        st.text_input("Consumo Fora da Ponta (R$/kWh):", tarifas_verde[4], key="input_tarifas4")
-        st.text_input(f"Consumo Ponta Verde (R$/kWh):", tarifas_verde[5], key="input_tarifas5")
-        st.text_input(f"Consumo Ponta Azul (R$/kWh):", tarifas_azul[5], key="input_tarifa6")
+        st.text_input("Demanda Ponta Azul (R$/kW):", round(tarifas_azul[2], 2), key="input_tarifas3")
+        st.text_input("Consumo Fora da Ponta (R$/kWh):", round(tarifas_verde[4], 2), key="input_tarifas4")
+        st.text_input(f"Consumo Ponta Verde (R$/kWh):", round(tarifas_verde[5], 2), key="input_tarifas5")
+        st.text_input(f"Consumo Ponta Azul (R$/kWh):", round(tarifas_azul[5], 2), key="input_tarifa6")
 
     st.write("---")
 
     if st.button("Calcular gasto anual :dollar:"):
-        custo_total = custo_atual()
-        st.write(f"Gasto anual: R$ {round(custo_total,2)}")
+        custo_total, custo_demanda = custo_atual()
+        custo_demanda_string = money_format(round(custo_demanda, 2))
+        st.write(f"Gasto anual TUSD demanda: R$ {custo_demanda_string}")
+
+
 
 def imprimir_dados():
     print(vetor_consumo_fp)
@@ -953,11 +998,16 @@ with st.expander(("Como realizar as simulações")):
 if st.button("Simular Verde :large_green_square:"):
     st.write("---")
     valor_otimo, demanda_otima_verde = varredura(30, 1000, demanda_contratada_verde)
-    custo = custo_atual()
-    economia_verde = custo - valor_otimo
-    st.write(f'Valor ótimo: R$ {round(valor_otimo,2)}')
+    custo_soma, custo_demanda = custo_atual()
+    economia_verde = custo_demanda - valor_otimo
+
+    valor_otimo_string = money_format(round(valor_otimo, 2))
+    st.write(f'Valor ótimo: R$ {valor_otimo_string}')
     st.write(f'Demanda Sugerida Fora da Ponta: {demanda_otima_verde} kW')
-    st.write(f'Economia: R$ {round(economia_verde,2)}')
+
+    economia_string = money_format(round(economia_verde, 2))
+    st.write(f'Economia: R$ {economia_string}')
+
     plotar_verde(demanda_contratada_verde, demanda_otima_verde, vetor_demanda_fp)
 
 
@@ -966,11 +1016,11 @@ if st.button("Simular Azul :large_blue_square:"):
     valor_otimo, demanda_otima_verde, valor_otimo_azul, demanda_otima_azul = \
         varredura_azul(30, 1000, demanda_contratada_verde, demanda_contratada_azul)
 
-    # custo = custo_atual()
-    # economia_verde = custo - valor_otimo
-    st.write(f'Valor ótimo: R$ {round(valor_otimo_azul,2)}')
+    custo_soma, custo_demanda = custo_atual()
+    economia_azul = custo_demanda - valor_otimo
+    st.write(f'Valor ótimo: R$ {round(valor_otimo_azul, 2)}')
     st.write(f'Demanda Sugerida na Ponta: {demanda_otima_azul} kW')
-    # st.write(f'Economia: R$ {round(economia_verde,2)}')
+    st.write(f'Economia: R$ {round(economia_azul, 2)}')
     plotar_azul(demanda_contratada_azul, demanda_otima_azul, vetor_demanda_ponta)
 
 
@@ -1001,16 +1051,23 @@ if st.button("Simular Completo :heavy_check_mark: "):
         custo_otimo = custo_total_azul
         demanda_sugerida_ponta = demanda_otima_azul
 
-    custo = custo_atual()
-    economia = custo - custo_otimo
-    st.write(f'Custo Atual: R$ {round(custo, 2)}')
-    st.write(f'Valor Total Verde: R$ {round(custo_total_verde, 2)}')
-    st.write(f'Valor Total Azul: R$ {round(custo_total_azul, 2)}')
+    custo_soma, custo_demanda = custo_atual()
+    economia = custo_soma - custo_otimo
+    custo_soma_string = money_format(round(custo_soma, 2))
+    st.write(f'Custo Atual: R$ {custo_soma_string}')
+
+    custo_verde_string = money_format(round(custo_total_verde, 2))
+    st.write(f'Valor Total Verde: R$ {custo_verde_string}')
+
+    custo_azul_string = money_format(round(custo_total_azul, 2))
+    st.write(f'Valor Total Azul: R$ {custo_azul_string}')
 
     st.write(f'Demanda Ótima Fora da Ponta: {demanda_otima_verde} kW')
     st.write(f'Demanda Ótima na Ponta: {demanda_sugerida_ponta} kW')
     st.write(f'Modalidade Sugerida: {modalidade_sugerida}')
-    st.write(f'Economia: R$ {round(economia, 2)}')
+
+    economia_round =  money_format(round(economia, 2))
+    st.write(f'Economia: R$ {economia_round}')
 
 
     plotar_verde(demanda_contratada_verde, demanda_otima_verde, vetor_demanda_fp)
